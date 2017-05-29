@@ -1,0 +1,101 @@
+﻿<Window x:Class="UpRevFileOpener.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UpRevFileOpener"
+        xmlns:common="clr-namespace:Common;assembly=RecentFileListLib"
+        xmlns:p="clr-namespace:UpRevFileOpener.Properties"
+        mc:Ignorable="d"
+        Icon="./Images/uprev_fb_page_logo_white_2_WKL_icon.ico"
+        Title="UpRev Viewer &amp; Editor" Height="350" Width="525"
+        WindowStartupLocation="CenterScreen" WindowState="Maximized"
+        Loaded="Window_Loaded">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open" Click="openFile" />
+                <MenuItem Header="_Save" Click="saveFile" IsEnabled="False" Name="saveItem"/>
+                <MenuItem Header="_Edit" Click="editFile" IsEnabled="False" Name="editItem"/>
+                <MenuItem Header="_Close" Click="closeFile"  IsEnabled="False" Name="closeItem"/>
+                <Separator />
+                <MenuItem Header="_Recent Files"
+                          ItemsSource="{Binding Source={x:Static p:Settings.Default}, Path=RecentItems, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                          Click="openRecentFile" 
+                          Name="recentFile"/>
+                <Separator />
+                <MenuItem Header="_Exit" Click="exitApp"/>
+            </MenuItem>
+            <Separator />
+            <ToggleButton Command="EditingCommands.ToggleBold" Name="btnBold">
+                <Image Source="./Images/Bold-26.png" Width="16" Height="16" />
+            </ToggleButton>
+            <ToggleButton Command="EditingCommands.ToggleItalic" Name="btnItalic">
+                <Image Source="./Images/Italic-26.png" Width="16" Height="16" />
+            </ToggleButton>
+            <ToggleButton Command="EditingCommands.ToggleUnderline" Name="btnUnderline">
+                <Image Source="./Images/Underline-26.png" Width="16" Height="16" />
+            </ToggleButton>
+            <Separator />
+            <ComboBox Name="comboFontFamily" Width="150" SelectionChanged="comboFontFamily_SelectionChanged" />
+            <ComboBox Name="comboFontSize" Width="50" IsEditable="True" TextBoxBase.TextChanged="comboFontSize_TextChanged" />
+        </Menu>
+        <RichTextBox Name="rtbEditor" SelectionChanged="rtbEditor_SelectionChanged" />
+        <Popup Name="saveFilePopup"  Placement="Center"  Width="200" Height="100" Margin="0,20,0,0">
+            <Border BorderBrush="Maroon"
+                    BorderThickness="3" 
+                    Background="Black">
+                <Border.Effect>
+                    <DropShadowEffect Color="Gray"
+                      Opacity=".50"
+                      ShadowDepth="8" />
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Label Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center">Enter password to protect file:</Label>
+                    <PasswordBox Grid.Row="1" Name="passwordSaveBox" VerticalAlignment="Center" Margin="15,0,15,0"/>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Margin="5" Click="savePasswordOk">Ok</Button>
+                        <Button Grid.Column="1" Margin="5" Click="savePasswordCancel">Cancel</Button>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Popup>
+        <Popup Name="openFilePopup"  Placement="Center"  Width="200" Height="100" Margin="0,20,0,0">
+            <Border BorderBrush="Maroon"
+                    BorderThickness="3" 
+                    Background="Black">
+                <Border.Effect>
+                    <DropShadowEffect Color="Gray"
+                      Opacity=".50"
+                      ShadowDepth="8" />
+                </Border.Effect>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Label Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center">Enter password to open file:</Label>
+                    <PasswordBox Grid.Row="1" Name="passwordOpenBox" VerticalAlignment="Center" Margin="15,0,15,0"/>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Margin="5" Click="openPasswordOk">Ok</Button>
+                        <Button Grid.Column="1" Margin="5" Click="openPasswordCancel">Cancel</Button>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Popup>
+    </DockPanel>
+</Window>
