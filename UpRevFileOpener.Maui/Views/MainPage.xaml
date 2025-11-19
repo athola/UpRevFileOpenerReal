@@ -78,14 +78,10 @@
                     IsEnabled="False" />
         </HorizontalStackLayout>
 
-        <!-- Editor for text content -->
-        <Editor x:Name="textEditor"
-                Grid.Row="1"
-                IsReadOnly="True"
-                BackgroundColor="White"
-                TextColor="Black"
-                FontSize="14"
-                Margin="5" />
+        <!-- Rich Text Editor using WebView -->
+        <WebView x:Name="richTextEditor"
+                 Grid.Row="1"
+                 BackgroundColor="White" />
 
         <!-- Overlay for password prompts -->
         <Grid x:Name="passwordOverlay"

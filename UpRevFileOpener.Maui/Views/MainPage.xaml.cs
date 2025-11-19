@@ -10,21 +10,57 @@ public partial class MainPage : ContentPage
     private string? _lastOpenedFile;
     private string? _id;
     private bool _isPasswordForOpen = true;
+    private bool _isReadOnly = true;
+    private bool _editorReady = false;
 
     public MainPage()
     {
         InitializeComponent();
         InitializeFontPickers();
         LoadRecentFiles();
+        InitializeEditor();
+    }
+
+    private async void InitializeEditor()
+    {
+        try
+        {
+            // Load the rich text editor HTML
+            var htmlSource = new HtmlWebViewSource();
+
+            // Read the editor HTML file
+            using var stream = await FileSystem.OpenAppPackageFileAsync("editor.html");
+            using var reader = new StreamReader(stream);
+            var html = await reader.ReadToEndAsync();
+
+            htmlSource.Html = html;
+            richTextEditor.Source = htmlSource;
+
+            // Set up WebView navigation handlers
+            richTextEditor.Navigated += OnEditorNavigated;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Failed to load rich text editor: {ex.Message}", "OK");
+        }
+    }
+
+    private void OnEditorNavigated(object? sender, WebNavigatedEventArgs e)
+    {
+        if (e.Result == WebNavigationResult.Success)
+        {
+            _editorReady = true;
+            // Set initial read-only state
+            SetEditorReadOnly(true);
+        }
     }
 
     private void InitializeFontPickers()
     {
-        // Populate font families (simplified for cross-platform)
+        // Populate font families (matching Quill.js fonts)
         var fontFamilies = new List<string>
         {
-            "Arial", "Courier New", "Georgia", "Times New Roman",
-            "Verdana", "Trebuchet MS", "Comic Sans MS"
+            "Arial", "Courier", "Georgia", "Times", "Verdana"
         };
         comboFontFamily.ItemsSource = fontFamilies;
         comboFontFamily.SelectedIndex = 0;
@@ -32,7 +68,7 @@ public partial class MainPage : ContentPage
         // Populate font sizes
         var fontSizes = new List<string>
         {
-            "8", "9", "10", "11", "12", "14", "16", "18", "20", "22", "24", "26", "28", "36", "48", "72"
+            "8", "9", "10", "11", "12", "14", "16", "18", "20", "24"
         };
         comboFontSize.ItemsSource = fontSizes;
         comboFontSize.SelectedIndex = 4; // Default to 12
@@ -92,7 +128,8 @@ public partial class MainPage : ContentPage
     private async void OpenFileActions(string fileName)
     {
         await LoadFileIntoEditor(fileName);
-        textEditor.IsReadOnly = true;
+        SetEditorReadOnly(true);
+        _isReadOnly = true;
         editItem.IsEnabled = true;
         saveItem.IsEnabled = true;
         closeItem.IsEnabled = true;
@@ -111,15 +148,75 @@ public partial class MainPage : ContentPage
     {
         try
         {
-            // Note: In the original WPF app, this loaded RTF format
-            // In MAUI, we'll load as plain text or implement custom RTF parsing
-            // For simplicity, loading as plain text here
-            var text = await File.ReadAllTextAsync(fileName);
-            textEditor.Text = text;
+            if (!_editorReady)
+            {
+                await DisplayAlert("Error", "Editor is not ready yet. Please try again.", "OK");
+                return;
+            }
+
+            // Read the file content
+            var content = await File.ReadAllTextAsync(fileName);
+
+            // Convert RTF to HTML if necessary
+            string htmlContent;
+            if (RtfHtmlConverter.IsRtf(content))
+            {
+                htmlContent = RtfHtmlConverter.RtfToHtml(content);
+            }
+            else if (RtfHtmlConverter.IsHtml(content))
+            {
+                htmlContent = content;
+            }
+            else
+            {
+                // Plain text - wrap in paragraph
+                htmlContent = $"<p>{content.Replace("\n", "</p><p>")}</p>";
+            }
+
+            // Escape quotes for JavaScript
+            var escapedHtml = htmlContent
+                .Replace("\\", "\\\\")
+                .Replace("'", "\\'")
+                .Replace("\r", "")
+                .Replace("\n", "\\n");
+
+            // Set content in editor
+            await richTextEditor.EvaluateJavaScriptAsync($"setContent('{escapedHtml}');");
         }
         catch (Exception ex)
         {
             await DisplayAlert("Error", $"Error loading file: {ex.Message}", "OK");
+        }
+    }
+
+    private async Task<string> GetEditorContent()
+    {
+        if (!_editorReady)
+            return string.Empty;
+
+        try
+        {
+            var html = await richTextEditor.EvaluateJavaScriptAsync("getContent();");
+            return html?.ToString() ?? string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    private async void SetEditorReadOnly(bool isReadOnly)
+    {
+        if (!_editorReady)
+            return;
+
+        try
+        {
+            await richTextEditor.EvaluateJavaScriptAsync($"setReadOnly({(isReadOnly ? "true" : "false")});");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error setting read-only: {ex.Message}");
         }
     }
 
@@ -207,24 +304,38 @@ public partial class MainPage : ContentPage
     {
         try
         {
-            var result = await FilePicker.PickAsync(new PickOptions
+            // Get content from editor
+            var htmlContent = await GetEditorContent();
+
+            if (string.IsNullOrEmpty(htmlContent))
             {
-                PickerTitle = "Save UpRev File"
-            });
+                await DisplayAlert("Error", "No content to save", "OK");
+                return;
+            }
 
-            // Note: MAUI FilePicker doesn't have a true "Save" dialog
-            // This is a limitation - on some platforms, you may need to use platform-specific code
-            // For now, we'll use a workaround
+            // Convert HTML to RTF
+            var rtfContent = RtfHtmlConverter.HtmlToRtf(htmlContent);
 
+            // Prompt for filename
             string? fileName = await DisplayPromptAsync("Save File", "Enter filename (without extension):");
             if (string.IsNullOrEmpty(fileName))
                 return;
 
-            // Get the app's document directory
-            string filePath = Path.Combine(FileSystem.AppDataDirectory, fileName + ".UpRev");
+            // Get the app's document directory or use platform-specific storage
+            string filePath;
+
+#if WINDOWS
+            // On Windows, try to save to Documents folder
+            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            filePath = Path.Combine(documentsPath, "UpRev Files", fileName + ".UpRev");
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+#else
+            // On other platforms, use app data directory
+            filePath = Path.Combine(FileSystem.AppDataDirectory, fileName + ".UpRev");
+#endif
 
             // Save the file
-            await File.WriteAllTextAsync(filePath, textEditor.Text);
+            await File.WriteAllTextAsync(filePath, rtfContent);
 
             // Handle password protection
             if (PasswordVerification.IsPasswordProtected(filePath))
@@ -255,7 +366,8 @@ public partial class MainPage : ContentPage
 
     private void OnEditFile(object sender, EventArgs e)
     {
-        textEditor.IsReadOnly = false;
+        SetEditorReadOnly(false);
+        _isReadOnly = false;
 
         // Enable formatting buttons
         btnBold.IsEnabled = true;
@@ -265,10 +377,15 @@ public partial class MainPage : ContentPage
         comboFontSize.IsEnabled = true;
     }
 
-    private void OnCloseFile(object sender, EventArgs e)
+    private async void OnCloseFile(object sender, EventArgs e)
     {
-        textEditor.Text = "";
-        textEditor.IsReadOnly = true;
+        if (_editorReady)
+        {
+            await richTextEditor.EvaluateJavaScriptAsync("clear();");
+        }
+
+        SetEditorReadOnly(true);
+        _isReadOnly = true;
         editItem.IsEnabled = false;
         saveItem.IsEnabled = false;
         closeItem.IsEnabled = false;
@@ -288,39 +405,45 @@ public partial class MainPage : ContentPage
     }
 
     // Formatting button handlers
-    // Note: MAUI Editor doesn't support rich text formatting like WPF RichTextBox
-    // These are placeholders for potential future implementation with a rich text editor component
     private async void OnBoldClicked(object sender, EventArgs e)
     {
-        await DisplayAlert("Note", "Rich text formatting is not available in this version. Consider using a third-party rich text editor component.", "OK");
+        if (_editorReady && !_isReadOnly)
+        {
+            await richTextEditor.EvaluateJavaScriptAsync("applyBold();");
+        }
     }
 
     private async void OnItalicClicked(object sender, EventArgs e)
     {
-        await DisplayAlert("Note", "Rich text formatting is not available in this version. Consider using a third-party rich text editor component.", "OK");
+        if (_editorReady && !_isReadOnly)
+        {
+            await richTextEditor.EvaluateJavaScriptAsync("applyItalic();");
+        }
     }
 
     private async void OnUnderlineClicked(object sender, EventArgs e)
     {
-        await DisplayAlert("Note", "Rich text formatting is not available in this version. Consider using a third-party rich text editor component.", "OK");
-    }
-
-    private void OnFontFamilyChanged(object sender, EventArgs e)
-    {
-        if (comboFontFamily.SelectedItem != null && !textEditor.IsReadOnly)
+        if (_editorReady && !_isReadOnly)
         {
-            textEditor.FontFamily = comboFontFamily.SelectedItem.ToString();
+            await richTextEditor.EvaluateJavaScriptAsync("applyUnderline();");
         }
     }
 
-    private void OnFontSizeChanged(object sender, EventArgs e)
+    private async void OnFontFamilyChanged(object sender, EventArgs e)
     {
-        if (comboFontSize.SelectedItem != null && !textEditor.IsReadOnly)
+        if (comboFontFamily.SelectedItem != null && !_isReadOnly && _editorReady)
         {
-            if (double.TryParse(comboFontSize.SelectedItem.ToString(), out double size))
-            {
-                textEditor.FontSize = size;
-            }
+            var font = comboFontFamily.SelectedItem.ToString()!.ToLower();
+            await richTextEditor.EvaluateJavaScriptAsync($"setFontFamily('{font}');");
+        }
+    }
+
+    private async void OnFontSizeChanged(object sender, EventArgs e)
+    {
+        if (comboFontSize.SelectedItem != null && !_isReadOnly && _editorReady)
+        {
+            var size = comboFontSize.SelectedItem.ToString();
+            await richTextEditor.EvaluateJavaScriptAsync($"setFontSize('{size}px');");
         }
     }
 }
