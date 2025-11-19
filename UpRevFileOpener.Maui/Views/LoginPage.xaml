@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="UpRevFileOpener.LoginPage"
+             Title="Login"
+             BackgroundColor="Black">
+    <ContentPage.Content>
+        <Grid>
+            <Frame CornerRadius="10"
+                   BorderColor="Maroon"
+                   BackgroundColor="Black"
+                   Margin="24"
+                   Padding="4"
+                   HasShadow="True"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"
+                   WidthRequest="400"
+                   HeightRequest="350">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="100" />
+                        <RowDefinition Height="125" />
+                        <RowDefinition Height="75" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Image Grid.Column="0"
+                               Margin="8"
+                               Source="uprev_logo.png"
+                               Aspect="AspectFit" />
+
+                        <Label Grid.Column="1"
+                               Text="Please Enter Your Product Key:"
+                               TextColor="White"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Start" />
+                    </Grid>
+
+                    <Entry Grid.Row="1"
+                           x:Name="productKey"
+                           HeightRequest="40"
+                           Margin="30"
+                           MaxLength="16"
+                           HorizontalTextAlignment="Center"
+                           Keyboard="Numeric"
+                           TextColor="White"
+                           BackgroundColor="{StaticResource Gray600}" />
+
+                    <Grid Grid.Row="2"
+                          Margin="10"
+                          HorizontalOptions="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100" />
+                            <ColumnDefinition Width="100" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                x:Name="btnLogin"
+                                Text="Login"
+                                Clicked="OnLoginClicked"
+                                Margin="15" />
+
+                        <Button Grid.Column="1"
+                                x:Name="btnCancel"
+                                Text="Cancel"
+                                Clicked="OnCancelClicked"
+                                Margin="15" />
+                    </Grid>
+                </Grid>
+            </Frame>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

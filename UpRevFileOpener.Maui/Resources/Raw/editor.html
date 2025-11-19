@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rich Text Editor</title>
+
+    <!-- Quill.js CSS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #editor-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #toolbar {
+            background: #f3f3f3;
+            border-bottom: 1px solid #ccc;
+            padding: 8px;
+        }
+
+        #editor {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .ql-container {
+            font-size: 14px;
+            height: calc(100% - 42px);
+        }
+
+        .ql-editor {
+            min-height: 100%;
+            padding: 12px 15px;
+        }
+
+        /* Custom toolbar styling */
+        .ql-toolbar {
+            border: none !important;
+            background: transparent;
+        }
+
+        .ql-container.ql-snow {
+            border: none !important;
+        }
+
+        /* Make toolbar buttons more touch-friendly */
+        .ql-toolbar button {
+            width: 32px !important;
+            height: 32px !important;
+        }
+
+        /* Read-only mode styling */
+        .ql-editor[contenteditable="false"] {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div id="editor-container">
+        <div id="toolbar">
+            <select class="ql-font">
+                <option value="arial" selected>Arial</option>
+                <option value="courier">Courier New</option>
+                <option value="georgia">Georgia</option>
+                <option value="times">Times New Roman</option>
+                <option value="verdana">Verdana</option>
+            </select>
+            <select class="ql-size">
+                <option value="8px">8</option>
+                <option value="9px">9</option>
+                <option value="10px">10</option>
+                <option value="11px">11</option>
+                <option value="12px" selected>12</option>
+                <option value="14px">14</option>
+                <option value="16px">16</option>
+                <option value="18px">18</option>
+                <option value="20px">20</option>
+                <option value="24px">24</option>
+            </select>
+            <button class="ql-bold"></button>
+            <button class="ql-italic"></button>
+            <button class="ql-underline"></button>
+            <button class="ql-strike"></button>
+            <select class="ql-color"></select>
+            <select class="ql-background"></select>
+            <button class="ql-list" value="ordered"></button>
+            <button class="ql-list" value="bullet"></button>
+            <select class="ql-align"></select>
+            <button class="ql-link"></button>
+            <button class="ql-clean"></button>
+        </div>
+        <div id="editor"></div>
+    </div>
+
+    <!-- Quill.js JavaScript -->
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+    <script>
+        // Custom font whitelist
+        var Font = Quill.import('formats/font');
+        Font.whitelist = ['arial', 'courier', 'georgia', 'times', 'verdana'];
+        Quill.register(Font, true);
+
+        // Custom size
+        var Size = Quill.import('attributors/style/size');
+        Size.whitelist = ['8px', '9px', '10px', '11px', '12px', '14px', '16px', '18px', '20px', '24px'];
+        Quill.register(Size, true);
+
+        // Initialize Quill editor
+        var quill = new Quill('#editor', {
+            modules: {
+                toolbar: '#toolbar'
+            },
+            theme: 'snow',
+            placeholder: 'Start typing...'
+        });
+
+        // Communication bridge with C#
+        function getContent() {
+            return quill.root.innerHTML;
+        }
+
+        function setContent(html) {
+            quill.root.innerHTML = html || '';
+        }
+
+        function getText() {
+            return quill.getText();
+        }
+
+        function setReadOnly(isReadOnly) {
+            quill.enable(!isReadOnly);
+            if (isReadOnly) {
+                document.getElementById('toolbar').style.display = 'none';
+            } else {
+                document.getElementById('toolbar').style.display = 'block';
+            }
+        }
+
+        function clear() {
+            quill.setText('');
+        }
+
+        function applyBold() {
+            var currentFormat = quill.getFormat();
+            quill.format('bold', !currentFormat.bold);
+        }
+
+        function applyItalic() {
+            var currentFormat = quill.getFormat();
+            quill.format('italic', !currentFormat.italic);
+        }
+
+        function applyUnderline() {
+            var currentFormat = quill.getFormat();
+            quill.format('underline', !currentFormat.underline);
+        }
+
+        function setFontFamily(font) {
+            quill.format('font', font);
+        }
+
+        function setFontSize(size) {
+            quill.format('size', size);
+        }
+
+        // Notify C# when content changes
+        quill.on('text-change', function(delta, oldDelta, source) {
+            if (source === 'user' && typeof invokeCSharpAction !== 'undefined') {
+                try {
+                    invokeCSharpAction('textChanged');
+                } catch (e) {
+                    // C# bridge might not be ready yet
+                }
+            }
+        });
+
+        // Make functions available globally for C# to call
+        window.getContent = getContent;
+        window.setContent = setContent;
+        window.getText = getText;
+        window.setReadOnly = setReadOnly;
+        window.clear = clear;
+        window.applyBold = applyBold;
+        window.applyItalic = applyItalic;
+        window.applyUnderline = applyUnderline;
+        window.setFontFamily = setFontFamily;
+        window.setFontSize = setFontSize;
+
+        // Signal that editor is ready
+        window.addEventListener('load', function() {
+            if (typeof invokeCSharpAction !== 'undefined') {
+                try {
+                    invokeCSharpAction('editorReady');
+                } catch (e) {
+                    console.log('C# bridge not ready');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
