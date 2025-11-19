@@ -11,7 +11,7 @@
             <MenuFlyoutItem x:Name="editItem" Text="Edit" Clicked="OnEditFile" IsEnabled="False" />
             <MenuFlyoutItem x:Name="closeItem" Text="Close" Clicked="OnCloseFile" IsEnabled="False" />
             <MenuFlyoutSeparator />
-            <MenuFlyoutSubItem Text="Recent Files">
+            <MenuFlyoutSubItem x:Name="recentFilesMenu" Text="Recent Files">
                 <!-- Recent files will be added dynamically -->
             </MenuFlyoutSubItem>
             <MenuFlyoutSeparator />

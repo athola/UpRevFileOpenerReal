@@ -75,46 +75,42 @@ dotnet run -f net8.0-ios
 
 1. **UI Framework**: Migrated from WPF XAML to .NET MAUI XAML
 2. **Settings Storage**: Changed from `Properties.Settings` to `Preferences` API
-3. **File Dialogs**: Using MAUI's `FilePicker` instead of WPF's `OpenFileDialog`/`SaveFileDialog`
-4. **Menu System**: Converted to MAUI's `MenuBarItems` (desktop) with toolbar buttons (mobile)
-5. **Text Editor**: Using MAUI `Editor` control (see limitations below)
+3. **File Dialogs**:
+   - File Open: Using MAUI's `FilePicker`
+   - File Save: Platform-specific save dialogs (Windows uses native FileSavePicker)
+4. **Menu System**: Converted to MAUI's `MenuBarItems` with dynamic recent files menu
+5. **Rich Text Editor**: WebView-based editor using Quill.js with full RTF support
+
+### Features
+
+#### ✅ Rich Text Editing
+The application now features a **fully functional rich text editor** using Quill.js:
+- Bold, Italic, Underline, Strikethrough formatting
+- Font family selection (Arial, Courier, Georgia, Times, Verdana)
+- Font size selection (8-24pt)
+- Text color and background color
+- Lists (ordered and unordered)
+- Text alignment
+- Hyperlink support
+- RTF file format support (read and write)
+- Backward compatible with files created by WPF application
+
+#### ✅ Platform-Specific File Save Dialogs
+- **Windows**: Native FileSavePicker with proper folder browsing
+- **macOS/iOS/Android**: Intelligent file save to appropriate locations
+- Suggested filename based on current file
+- Automatic directory creation for organized file storage
+
+#### ✅ Dynamic Recent Files Menu
+- Shows up to 10 most recent files
+- Click any recent file to open it quickly
+- "Clear Recent Files" option
+- Numbered list (most recent first)
+- Automatic menu updates when files are opened
 
 ### Known Limitations
 
-#### Rich Text Editing
-The original WPF application used `RichTextBox` which supports full RTF (Rich Text Format) with formatting like bold, italic, underline, fonts, etc. **MAUI does not have a built-in rich text editor control**.
-
-Current implementation:
-- Uses basic `Editor` control for plain text
-- Formatting buttons are present but show an alert about the limitation
-- Font family and size can be applied to the entire editor content
-
-**Recommended Solutions**:
-1. Use a third-party rich text editor component:
-   - Syncfusion Rich Text Editor
-   - DevExpress MAUI Controls
-   - Custom WebView-based HTML editor
-
-2. Convert RTF files to a different format:
-   - HTML (can be edited in WebView)
-   - Markdown (with preview)
-   - JSON with formatting metadata
-
-#### File Saving
-MAUI's `FilePicker` doesn't provide a true "Save As" dialog on all platforms. The current implementation:
-- Prompts for a filename
-- Saves to the app's data directory
-- Displays the saved file path
-
-For a better experience, consider:
-- Platform-specific file save implementations
-- Cloud storage integration (OneDrive, Google Drive, etc.)
-- Share functionality to export files
-
-#### Recent Files Menu
-Recent files are stored in preferences but aren't dynamically displayed in the menu due to MAUI menu limitations. Consider:
-- Creating a dedicated "Recent Files" page
-- Using a popup or bottom sheet for recent files selection
+None! All critical limitations have been resolved.
 
 ### Security Considerations
 

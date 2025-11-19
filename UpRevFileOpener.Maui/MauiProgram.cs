@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using UpRevFileOpener.Services;
 
 namespace UpRevFileOpener;
 
@@ -14,6 +15,13 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
+
+        // Register platform-specific services
+#if WINDOWS
+        builder.Services.AddSingleton<IFileSaveService, WindowsFileSaveService>();
+#else
+        builder.Services.AddSingleton<IFileSaveService, DefaultFileSaveService>();
+#endif
 
 #if DEBUG
         builder.Logging.AddDebug();

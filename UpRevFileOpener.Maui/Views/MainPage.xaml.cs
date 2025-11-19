@@ -12,9 +12,11 @@ public partial class MainPage : ContentPage
     private bool _isPasswordForOpen = true;
     private bool _isReadOnly = true;
     private bool _editorReady = false;
+    private readonly IFileSaveService _fileSaveService;
 
-    public MainPage()
+    public MainPage(IFileSaveService fileSaveService)
     {
+        _fileSaveService = fileSaveService;
         InitializeComponent();
         InitializeFontPickers();
         LoadRecentFiles();
@@ -76,8 +78,79 @@ public partial class MainPage : ContentPage
 
     private void LoadRecentFiles()
     {
-        // TODO: Dynamically populate recent files menu
-        // This requires custom menu item creation which is more complex in MAUI
+        try
+        {
+            // Clear existing recent file items
+            recentFilesMenu.Clear();
+
+            var recentItems = SettingsService.RecentItems;
+
+            if (recentItems == null || recentItems.Count == 0)
+            {
+                // Add a disabled "No recent files" item
+                var noFilesItem = new MenuFlyoutItem
+                {
+                    Text = "No recent files",
+                    IsEnabled = false
+                };
+                recentFilesMenu.Add(noFilesItem);
+                return;
+            }
+
+            // Add recent files in reverse order (most recent first)
+            for (int i = recentItems.Count - 1; i >= 0; i--)
+            {
+                var filePath = recentItems[i];
+                var fileName = Path.GetFileName(filePath);
+
+                var menuItem = new MenuFlyoutItem
+                {
+                    Text = $"{recentItems.Count - i}. {fileName}",
+                    CommandParameter = filePath
+                };
+
+                menuItem.Clicked += OnRecentFileClicked;
+                recentFilesMenu.Add(menuItem);
+            }
+
+            // Add separator and clear history option
+            recentFilesMenu.Add(new MenuFlyoutSeparator());
+
+            var clearHistoryItem = new MenuFlyoutItem
+            {
+                Text = "Clear Recent Files"
+            };
+            clearHistoryItem.Clicked += OnClearRecentFiles;
+            recentFilesMenu.Add(clearHistoryItem);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading recent files: {ex.Message}");
+        }
+    }
+
+    private void OnRecentFileClicked(object? sender, EventArgs e)
+    {
+        if (sender is MenuFlyoutItem menuItem && menuItem.CommandParameter is string filePath)
+        {
+            _lastOpenedFile = filePath;
+            CheckOpenFile(_lastOpenedFile);
+        }
+    }
+
+    private async void OnClearRecentFiles(object? sender, EventArgs e)
+    {
+        bool confirm = await DisplayAlert(
+            "Clear Recent Files",
+            "Are you sure you want to clear all recent files?",
+            "Yes",
+            "No");
+
+        if (confirm)
+        {
+            SettingsService.RecentItems = new List<string>();
+            LoadRecentFiles();
+        }
     }
 
     private async void OnOpenFile(object sender, EventArgs e)
@@ -316,23 +389,15 @@ public partial class MainPage : ContentPage
             // Convert HTML to RTF
             var rtfContent = RtfHtmlConverter.HtmlToRtf(htmlContent);
 
-            // Prompt for filename
-            string? fileName = await DisplayPromptAsync("Save File", "Enter filename (without extension):");
-            if (string.IsNullOrEmpty(fileName))
-                return;
+            // Use platform-specific file save dialog
+            string suggestedFileName = _currentFileName != null
+                ? Path.GetFileNameWithoutExtension(_currentFileName)
+                : "Untitled";
 
-            // Get the app's document directory or use platform-specific storage
-            string filePath;
+            string? filePath = await _fileSaveService.SaveFileAsync(suggestedFileName, ".UpRev");
 
-#if WINDOWS
-            // On Windows, try to save to Documents folder
-            var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            filePath = Path.Combine(documentsPath, "UpRev Files", fileName + ".UpRev");
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-#else
-            // On other platforms, use app data directory
-            filePath = Path.Combine(FileSystem.AppDataDirectory, fileName + ".UpRev");
-#endif
+            if (string.IsNullOrEmpty(filePath))
+                return; // User cancelled
 
             // Save the file
             await File.WriteAllTextAsync(filePath, rtfContent);
@@ -356,6 +421,7 @@ public partial class MainPage : ContentPage
             SettingsService.FileNames = fileNames;
             SettingsService.Passwords = passwords;
 
+            _currentFileName = filePath;
             await DisplayAlert("Success", $"File saved to: {filePath}", "OK");
         }
         catch (Exception ex)
