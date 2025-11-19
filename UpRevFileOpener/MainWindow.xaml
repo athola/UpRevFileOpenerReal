@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UpRevFileOpener"
-        xmlns:common="clr-namespace:Common;assembly=RecentFileListLib"
         xmlns:p="clr-namespace:UpRevFileOpener.Properties"
         mc:Ignorable="d"
         Icon="./Images/uprev_fb_page_logo_white_2_WKL_icon.ico"
