@@ -22,8 +22,8 @@ jobs:
     - name: Install required .NET workloads
       run: dotnet workload install maui-android wasm-tools-net8
 
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Restore MAUI project for Android
+      run: dotnet restore UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --framework net8.0-android
 
     - name: Check code formatting
       run: dotnet format --verify-no-changes --verbosity diagnostic
