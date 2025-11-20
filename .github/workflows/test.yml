@@ -27,7 +27,7 @@ jobs:
         sed -i 's|<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>|<TargetFrameworks>net8.0-android</TargetFrameworks>|g' UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj
 
     - name: Build MAUI project for Android
-      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android
+      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android /p:AndroidSdkDirectory=$ANDROID_SDK_ROOT /p:JavaSdkDirectory=$JAVA_HOME
 
     - name: Restore Unit Tests
       run: dotnet restore UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj
