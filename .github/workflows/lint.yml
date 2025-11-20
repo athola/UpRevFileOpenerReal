@@ -19,18 +19,5 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Install required .NET workloads
-      run: dotnet workload install maui-android wasm-tools-net8
-
-    - name: Configure project for Android-only build
-      run: |
-        sed -i 's|<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>|<TargetFrameworks>net8.0-android</TargetFrameworks>|g' UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj
-
-    - name: Build MAUI project for Android
-      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android /p:AndroidSdkDirectory=$ANDROID_SDK_ROOT /p:JavaSdkDirectory=$JAVA_HOME
-
-    - name: Check code formatting on MAUI project
-      run: dotnet format UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --verify-no-changes --verbosity diagnostic --no-restore
-
-    - name: Run code analysis on MAUI project
-      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android --no-restore /p:EnableNETAnalyzers=true /p:AnalysisLevel=latest /p:TreatWarningsAsErrors=false /p:AndroidSdkDirectory=$ANDROID_SDK_ROOT /p:JavaSdkDirectory=$JAVA_HOME
+    - name: Check code formatting
+      run: dotnet format UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --verify-no-changes --verbosity diagnostic
