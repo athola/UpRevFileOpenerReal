@@ -36,7 +36,7 @@ jobs:
       run: dotnet restore UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj
 
     - name: Build Android app
-      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android --no-restore
+      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android --no-restore -p:AndroidKeyStore=false
 
     - name: Upload Android build artifacts
       uses: actions/upload-artifact@v4
