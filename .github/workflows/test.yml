@@ -14,15 +14,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Java JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: Download fonts
-      run: bash download-fonts.sh
-
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -35,7 +26,7 @@ jobs:
       run: dotnet restore UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj
 
     - name: Build Android app
-      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Debug --framework net8.0-android --no-restore
+      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj -c Debug -f net8.0-android --no-restore
 
     - name: Upload Android build
       uses: actions/upload-artifact@v4
