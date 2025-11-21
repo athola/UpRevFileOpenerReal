@@ -19,6 +19,12 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    - name: Clean old SDK manifests
+      run: |
+        Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\6.0.300" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\6.0.400" -Recurse -Force -ErrorAction SilentlyContinue
+      shell: pwsh
+
     - name: Install MAUI workload
       run: dotnet workload install maui
 
