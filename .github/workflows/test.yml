@@ -35,13 +35,13 @@ jobs:
       run: dotnet restore UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj
 
     - name: Build Android app
-      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android --no-restore -p:AndroidKeyStore=false
+      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Debug --framework net8.0-android --no-restore
 
     - name: Upload Android build
       uses: actions/upload-artifact@v4
       with:
         name: android-build
-        path: UpRevFileOpener.Maui/bin/Release/net8.0-android/**/*
+        path: UpRevFileOpener.Maui/bin/Debug/net8.0-android/**/*
         retention-days: 1
 
   test:
@@ -61,25 +61,25 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: android-build
-        path: UpRevFileOpener.Maui/bin/Release/net8.0-android
+        path: UpRevFileOpener.Maui/bin/Debug/net8.0-android
 
     - name: Restore Unit Tests
       run: dotnet restore UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj
 
     - name: Build Unit Tests
-      run: dotnet build UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj --configuration Release --no-restore
+      run: dotnet build UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj --configuration Debug --no-restore
 
     - name: Restore Integration Tests
       run: dotnet restore UpRevFileOpener.Maui.IntegrationTests/UpRevFileOpener.Maui.IntegrationTests.csproj
 
     - name: Build Integration Tests
-      run: dotnet build UpRevFileOpener.Maui.IntegrationTests/UpRevFileOpener.Maui.IntegrationTests.csproj --configuration Release --no-restore
+      run: dotnet build UpRevFileOpener.Maui.IntegrationTests/UpRevFileOpener.Maui.IntegrationTests.csproj --configuration Debug --no-restore
 
     - name: Run Unit Tests
-      run: dotnet test UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+      run: dotnet test UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj --configuration Debug --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
 
     - name: Run Integration Tests
-      run: dotnet test UpRevFileOpener.Maui.IntegrationTests/UpRevFileOpener.Maui.IntegrationTests.csproj --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+      run: dotnet test UpRevFileOpener.Maui.IntegrationTests/UpRevFileOpener.Maui.IntegrationTests.csproj --configuration Debug --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4
