@@ -7,7 +7,7 @@ on:
     branches: [ main, master, develop ]
 
 jobs:
-  test:
+  build-android:
     runs-on: windows-latest
 
     steps:
@@ -22,8 +22,37 @@ jobs:
     - name: Install MAUI workload
       run: dotnet workload install maui
 
-    - name: Build MAUI project for Android
-      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android
+    - name: Restore dependencies
+      run: dotnet restore UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj
+
+    - name: Build Android app
+      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android --no-restore
+
+    - name: Upload Android build
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-build
+        path: UpRevFileOpener.Maui/bin/Release/net8.0-android/**/*
+        retention-days: 1
+
+  test:
+    runs-on: windows-latest
+    needs: build-android
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Download Android build artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: android-build
+        path: UpRevFileOpener.Maui/bin/Release/net8.0-android
 
     - name: Restore Unit Tests
       run: dotnet restore UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj
