@@ -29,12 +29,9 @@ jobs:
     - name: Build Android app
       run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android --no-restore
 
-    - name: Publish Android app
-      run: dotnet publish UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj --configuration Release --framework net8.0-android --no-build --output ./artifacts/android
-
-    - name: Upload Android artifacts
+    - name: Upload Android build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: android-build
-        path: ./artifacts/android/**/*
+        name: android-standalone-build
+        path: UpRevFileOpener.Maui/bin/Release/net8.0-android/**/*
         retention-days: 30
