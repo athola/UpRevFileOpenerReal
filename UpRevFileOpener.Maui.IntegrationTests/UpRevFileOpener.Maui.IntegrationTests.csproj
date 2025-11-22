@@ -6,12 +6,9 @@
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <UseMaui>true</UseMaui>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-    <!-- Prevent MAUI from processing resources in test project -->
-    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
-    <EnableDefaultMauiItems>false</EnableDefaultMauiItems>
-    <MauiEnableResizetizer>false</MauiEnableResizetizer>
+    <UseWPF>false</UseWPF>
+    <UseWindowsForms>false</UseWindowsForms>
   </PropertyGroup>
 
   <ItemGroup>
