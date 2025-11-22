@@ -17,10 +17,11 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '8.0.404'
 
-    - name: Clean old SDK manifests
+    - name: Clean environment
       run: |
+        dotnet nuget locals all --clear
         Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\6.0.300" -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\6.0.400" -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\7.0.100" -Recurse -Force -ErrorAction SilentlyContinue
@@ -30,7 +31,7 @@ jobs:
       shell: pwsh
 
     - name: Install MAUI workload
-      run: dotnet workload install maui --source https://api.nuget.org/v3/index.json
+      run: dotnet workload install maui-android --ignore-failed-sources
 
     - name: Restore dependencies
       run: dotnet restore UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj
