@@ -7,8 +7,18 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-    <UseWPF>false</UseWPF>
-    <UseWindowsForms>false</UseWindowsForms>
+    <UseMaui>true</UseMaui>
+    <SingleProject>false</SingleProject>
+    <!-- Disable all MAUI resource processing for test project -->
+    <EnableDefaultMauiItems>false</EnableDefaultMauiItems>
+    <MauiEnableResizetizer>false</MauiEnableResizetizer>
+    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
+    <!-- Prevent any MAUI assets from being processed -->
+    <MauiIcon Remove="@(MauiIcon)" />
+    <MauiSplashScreen Remove="@(MauiSplashScreen)" />
+    <MauiImage Remove="@(MauiImage)" />
+    <MauiFont Remove="@(MauiFont)" />
+    <MauiAsset Remove="@(MauiAsset)" />
   </PropertyGroup>
 
   <ItemGroup>
