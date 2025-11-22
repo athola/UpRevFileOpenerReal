@@ -11,6 +11,7 @@
     <!-- Prevent MAUI from processing resources in test project -->
     <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
     <EnableDefaultMauiItems>false</EnableDefaultMauiItems>
+    <MauiEnableResizetizer>false</MauiEnableResizetizer>
   </PropertyGroup>
 
   <ItemGroup>
