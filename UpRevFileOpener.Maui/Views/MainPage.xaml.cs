@@ -368,7 +368,7 @@ public partial class MainPage : ContentPage
         passwordEntry.Text = "";
     }
 
-    private async void OnSaveFile(object sender, EventArgs e)
+    private void OnSaveFile(object sender, EventArgs e)
     {
         ShowPasswordPrompt(false); // false = for saving
     }

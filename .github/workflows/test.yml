@@ -1,0 +1,95 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-android:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.404'
+
+    - name: Clean environment
+      run: |
+        dotnet nuget locals all --clear
+        Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\6.0.300" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\6.0.400" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\7.0.100" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\7.0.200" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\7.0.300" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "C:\Program Files\dotnet\sdk-manifests\7.0.400" -Recurse -Force -ErrorAction SilentlyContinue
+      shell: pwsh
+
+    - name: Install MAUI workload
+      run: dotnet workload install maui --ignore-failed-sources
+
+    - name: Restore dependencies
+      run: dotnet restore UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj /p:TargetFramework=net8.0-android
+
+    - name: Build Android app
+      run: dotnet build UpRevFileOpener.Maui/UpRevFileOpener.Maui.csproj -c Debug -f net8.0-android --no-restore
+
+    - name: Upload Android build
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-build
+        path: UpRevFileOpener.Maui/bin/Debug/net8.0-android/**/*
+        retention-days: 1
+
+  test:
+    runs-on: windows-latest
+    needs: build-android
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Download Android build artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: android-build
+        path: UpRevFileOpener.Maui/bin/Debug/net8.0-android
+
+    - name: Install MAUI workload
+      run: dotnet workload install maui --ignore-failed-sources
+
+    - name: Restore Unit Tests
+      run: dotnet restore UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj
+
+    - name: Build Unit Tests
+      run: dotnet build UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj --configuration Debug --no-restore
+
+    - name: Restore Integration Tests
+      run: dotnet restore UpRevFileOpener.Maui.IntegrationTests/UpRevFileOpener.Maui.IntegrationTests.csproj
+
+    - name: Build Integration Tests
+      run: dotnet build UpRevFileOpener.Maui.IntegrationTests/UpRevFileOpener.Maui.IntegrationTests.csproj --configuration Debug --no-restore
+
+    - name: Run Unit Tests
+      run: dotnet test UpRevFileOpener.Maui.UnitTests/UpRevFileOpener.Maui.UnitTests.csproj --configuration Debug --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+    - name: Run Integration Tests
+      run: dotnet test UpRevFileOpener.Maui.IntegrationTests/UpRevFileOpener.Maui.IntegrationTests.csproj --configuration Debug --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        directory: ./coverage
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+      if: always()

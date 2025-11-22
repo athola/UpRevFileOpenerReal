@@ -54,7 +54,7 @@ public static class RtfHtmlConverter
 
             return html.ToString();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // If conversion fails, return plain text extraction
             return ExtractPlainTextFromRtf(rtf);
@@ -97,7 +97,7 @@ public static class RtfHtmlConverter
 
             return rtf.ToString();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             // If conversion fails, create a simple RTF with the HTML as plain text
             var plainText = StripHtmlTags(html);
