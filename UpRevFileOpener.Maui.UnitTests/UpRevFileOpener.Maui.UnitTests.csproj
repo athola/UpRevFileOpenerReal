@@ -30,7 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UpRevFileOpener.Maui\UpRevFileOpener.Maui.csproj" />
+    <ProjectReference Include="..\UpRevFileOpener.Maui\UpRevFileOpener.Maui.csproj">
+      <PrivateAssets>all</PrivateAssets>
+      <ExcludeAssets>contentfiles;build;buildMultitargeting;buildTransitive</ExcludeAssets>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
