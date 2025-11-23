@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UpRevFileOpener.Maui\UpRevFileOpener.Maui.csproj" />
+    <ProjectReference Include="..\UpRevFileOpener.Maui\UpRevFileOpener.Maui.csproj">
+      <PrivateAssets>all</PrivateAssets>
+      <ExcludeAssets>contentfiles;build;buildMultitargeting;buildTransitive</ExcludeAssets>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

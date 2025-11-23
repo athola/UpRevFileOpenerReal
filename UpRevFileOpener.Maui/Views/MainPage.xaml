@@ -48,8 +48,7 @@
                     IsEnabled="False" />
 
             <Button x:Name="btnUnderline"
-                    Text="U"
-                    TextDecorations="Underline"
+                    Text="U̲"
                     WidthRequest="40"
                     HeightRequest="40"
                     Clicked="OnUnderlineClicked"

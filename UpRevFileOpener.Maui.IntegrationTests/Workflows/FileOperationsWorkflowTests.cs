@@ -29,7 +29,7 @@ public class FileOperationsWorkflowTests
     {
         // Arrange
         const string fileName = "document.rtf";
-        const string fileId = IDVerification.GetId();
+        var fileId = IDVerification.GetId();
         const string password = "mypassword";
 
         var fileNames = new List<string> { fileId + fileName };
