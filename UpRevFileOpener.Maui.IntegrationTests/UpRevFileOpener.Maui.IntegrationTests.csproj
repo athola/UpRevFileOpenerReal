@@ -37,6 +37,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <!-- Explicitly exclude Resizetizer build targets -->
+    <PackageReference Include="Microsoft.Maui.Resizetizer" Version="8.0.100" ExcludeAssets="all" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
