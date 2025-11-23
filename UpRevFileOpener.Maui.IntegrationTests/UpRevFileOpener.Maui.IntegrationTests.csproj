@@ -13,13 +13,16 @@
     <EnableDefaultMauiItems>false</EnableDefaultMauiItems>
     <MauiEnableResizetizer>false</MauiEnableResizetizer>
     <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
-    <!-- Prevent any MAUI assets from being processed -->
+  </PropertyGroup>
+
+  <!-- Remove any MAUI assets that might be inherited -->
+  <ItemGroup>
     <MauiIcon Remove="@(MauiIcon)" />
     <MauiSplashScreen Remove="@(MauiSplashScreen)" />
     <MauiImage Remove="@(MauiImage)" />
     <MauiFont Remove="@(MauiFont)" />
     <MauiAsset Remove="@(MauiAsset)" />
-  </PropertyGroup>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0">
