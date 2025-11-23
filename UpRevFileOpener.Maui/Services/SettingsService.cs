@@ -27,8 +27,9 @@ public static class SettingsService
 
             try
             {
-                // Try to access Preferences to see if MAUI is initialized
-                _ = Preferences.Default;
+                // Try to actually use Preferences to see if MAUI is initialized
+                // Just accessing Preferences.Default may not throw even if MAUI isn't initialized
+                Preferences.Default.ContainsKey("__test_key__");
                 _useInMemoryStorage = false;
             }
             catch
