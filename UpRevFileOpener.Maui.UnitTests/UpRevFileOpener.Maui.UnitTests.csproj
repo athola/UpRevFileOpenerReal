@@ -7,22 +7,7 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
-    <UseMaui>true</UseMaui>
-    <SingleProject>false</SingleProject>
-    <!-- Disable all MAUI resource processing for test project -->
-    <EnableDefaultMauiItems>false</EnableDefaultMauiItems>
-    <MauiEnableResizetizer>false</MauiEnableResizetizer>
-    <SkipValidateMauiImplicitPackageReferences>true</SkipValidateMauiImplicitPackageReferences>
   </PropertyGroup>
-
-  <!-- Remove any MAUI assets that might be inherited -->
-  <ItemGroup>
-    <MauiIcon Remove="@(MauiIcon)" />
-    <MauiSplashScreen Remove="@(MauiSplashScreen)" />
-    <MauiImage Remove="@(MauiImage)" />
-    <MauiFont Remove="@(MauiFont)" />
-    <MauiAsset Remove="@(MauiAsset)" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0">
@@ -37,8 +22,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <!-- Explicitly exclude Resizetizer build targets -->
-    <PackageReference Include="Microsoft.Maui.Resizetizer" Version="8.0.100" ExcludeAssets="all" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
