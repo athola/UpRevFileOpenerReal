@@ -25,6 +25,13 @@ public static class SettingsService
             if (_useInMemoryStorage.HasValue)
                 return _useInMemoryStorage.Value;
 
+            // Check if we're in a test environment first
+            if (IsTestEnvironment())
+            {
+                _useInMemoryStorage = true;
+                return true;
+            }
+
             try
             {
                 // Try to actually use Preferences to see if MAUI is initialized
@@ -37,6 +44,32 @@ public static class SettingsService
                 _useInMemoryStorage = true;
             }
             return _useInMemoryStorage.Value;
+        }
+    }
+
+    private static bool IsTestEnvironment()
+    {
+        try
+        {
+            // Check if any test framework assemblies are loaded
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            foreach (var assembly in assemblies)
+            {
+                var name = assembly.GetName().Name;
+                if (name != null && (
+                    name.Contains("xunit", StringComparison.OrdinalIgnoreCase) ||
+                    name.Contains("nunit", StringComparison.OrdinalIgnoreCase) ||
+                    name.Contains("mstest", StringComparison.OrdinalIgnoreCase) ||
+                    name.Contains("testhost", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        catch
+        {
+            return false;
         }
     }
 
